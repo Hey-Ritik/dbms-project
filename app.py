@@ -10,13 +10,12 @@ CORS(app)
 db_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'siddu1232006',
+    'password': '8085683002',
     'database': 'ResumeShortlisting'
 }
 
 def recalculate_score_for_candidate(conn, cid):
     cursor = conn.cursor(dictionary=True)
-
     cursor.execute("SELECT * FROM Candidate WHERE candidate_id = %s", (cid,))
     candidate = cursor.fetchone()
 
@@ -29,9 +28,9 @@ def recalculate_score_for_candidate(conn, cid):
     cursor.execute("SELECT * FROM RankingWeights LIMIT 1")
     weights = cursor.fetchone()
 
-    exp_score = min(candidate['experience'], 10) / 10.0
+    exp_score = min(candidate['experience'], 10) / 10.0 if candidate['experience'] else 0
     edu_score_map = {'PhD': 1.0, 'Master': 0.8, 'Bachelor': 0.6, 'Diploma': 0.4, 'Other': 0.2}
-    edu_score = edu_score_map.get(candidate['education_level'], 0.2)
+    edu_score = edu_score_map.get(candidate['education_level'], 0)
 
     skill_score = (sum(skill['proficiency_level'] for skill in skills) / len(skills) / 10.0) if skills else 0.0
     cert_score = (min(sum(cert['validity_years'] for cert in certs), 10) / 10.0) if certs else 0.0
@@ -40,6 +39,13 @@ def recalculate_score_for_candidate(conn, cid):
              edu_score * weights['education_weight'] +
              skill_score * weights['skill_weight'] +
              cert_score * weights['certification_weight'])
+
+    # Print values for debugging
+    print("Experience Score:", exp_score)
+    print("Education Score:", edu_score)
+    print("Skill Score:", skill_score)
+    print("Cert Score:", cert_score)
+    print("Total Score Calculated:", total)
 
     cursor.execute("UPDATE Candidate SET total_score = %s WHERE candidate_id = %s", (total, cid))
     conn.commit()
