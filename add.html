@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Delete Candidate</title>
+  <title>Add Candidate</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -19,30 +19,99 @@
   </header>
 
   <main>
-    <h2>❌ Delete Candidate</h2>
-    <form id="deleteForm">
-      <input type="number" name="candidate_id" placeholder="Candidate ID" required>
-      <button type="submit">Delete</button>
+    <h2>➕ Add Candidate</h2>
+    <form id="candidateForm">
+      <input type="text" placeholder="Name" name="name" required><br>
+      <input type="email" placeholder="Email" name="email" required><br>
+      <input type="text" placeholder="Phone" name="phone"><br>
+      <input type="number" placeholder="Experience (years)" name="experience" required><br>
+
+      <select name="education_level" required>
+        <option value="">Select Education</option>
+        <option>PhD</option>
+        <option>Master</option>
+        <option>Bachelor</option>
+        <option>Diploma</option>
+        <option>Other</option>
+      </select><br>
+
+      <h3>🛠️ Skills</h3>
+      <div id="skills"></div>
+      <button type="button" onclick="addSkill()">+ Add Skill</button><br>
+
+      <h3>📜 Certifications</h3>
+      <div id="certs"></div>
+      <button type="button" onclick="addCert()">+ Add Certification</button><br><br>
+
+      <button type="submit">Submit</button>
     </form>
   </main>
 
   <script>
-    document.getElementById('deleteForm').onsubmit = async function(e) {
+    function addSkill() {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <input name="skill_name" placeholder="Skill" required>
+        <input name="proficiency_level" type="number" placeholder="Proficiency (1–10)" min="1" max="10" required>
+      `;
+      document.getElementById('skills').appendChild(div);
+    }
+
+    function addCert() {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <input name="certification_name" placeholder="Certification" required>
+        <input name="issuing_organization" placeholder="Organization" required>
+        <input name="validity_years" type="number" placeholder="Valid (years)" min="0" required>
+      `;
+      document.getElementById('certs').appendChild(div);
+    }
+
+    document.getElementById('candidateForm').onsubmit = async function(e) {
       e.preventDefault();
-      const id = e.target.candidate_id.value.trim();
-      if (!id) return alert("Please enter a valid Candidate ID.");
+      const form = e.target;
 
-      const res = await fetch(`/api/candidates/${id}`, { method: 'DELETE' });
+      const candidate = {
+        name: form.name.value,
+        email: form.email.value,
+        phone: form.phone.value,
+        experience: parseInt(form.experience.value),
+        education_level: form.education_level.value,
+        skills: [],
+        certifications: []
+      };
+
+      const skillNames = form.querySelectorAll('[name="skill_name"]');
+      const skillLevels = form.querySelectorAll('[name="proficiency_level"]');
+      skillNames.forEach((el, i) => {
+        candidate.skills.push({
+          skill_name: el.value,
+          proficiency_level: parseInt(skillLevels[i].value)
+        });
+      });
+
+      const certNames = form.querySelectorAll('[name="certification_name"]');
+      const certOrgs = form.querySelectorAll('[name="issuing_organization"]');
+      const certYears = form.querySelectorAll('[name="validity_years"]');
+      certNames.forEach((el, i) => {
+        candidate.certifications.push({
+          certification_name: el.value,
+          issuing_organization: certOrgs[i].value,
+          validity_years: parseInt(certYears[i].value)
+        });
+      });
+
+      const res = await fetch('/candidates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(candidate)
+      });
+
       const result = await res.json();
-
-      if (res.status === 404) {
-        alert(`⚠️ Error: ${result.error}`);
-      } else if (res.ok) {
-        alert(`✅ ${result.message}`);
-        e.target.reset();
-      } else {
-        alert(`⚠️ Something went wrong: ${result.error}`);
-      }
+      alert(result.message || result.error);
+      form.reset();
+      document.getElementById('skills').innerHTML = '';
+      document.getElementById('certs').innerHTML = '';
     };
   </script>
 </body>
