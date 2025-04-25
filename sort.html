@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sorted Candidates</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <img src="{{ url_for('static', filename='banner.jpg') }}" alt="Banner" class="banner">
+    <nav>
+      <a href="/">🏠 Home</a>
+      <a href="/add">➕ Add</a>
+      <a href="/delete">❌ Delete</a>
+      <a href="/display">📋 Display</a>
+      <a href="/sort">📊 Sort</a>
+      <a href="/search_page">🔍 Search</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>📊 Sorted Candidates (by Total Score)</h2>
+    <div id="results" class="card-container"></div>
+  </main>
+
+  <script>
+    async function loadSortedCandidates() {
+      const res = await fetch('/api/candidates/sorted');
+      const data = await res.json();
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+
+      if (!data.length) {
+        resultsDiv.innerHTML = '<p>No candidates found.</p>';
+        return;
+      }
+
+      data.forEach(candidate => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3>${candidate.name} (ID: ${candidate.candidate_id})</h3>
+          <p><strong>Email:</strong> ${candidate.email}</p>
+          <p><strong>Experience:</strong> ${candidate.experience} yrs</p>
+          <p><strong>Education:</strong> ${candidate.education_level}</p>
+          <p><strong>Total Score:</strong> ${candidate.total_score ? candidate.total_score.toFixed(2) : 'N/A'}</p>
+        `;
+        resultsDiv.appendChild(card);
+      });
+    }
+
+    loadSortedCandidates();
+  </script>
+</body>
+</html>

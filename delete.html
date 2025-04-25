@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Delete Candidate</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <img src="{{ url_for('static', filename='banner.jpg') }}" alt="Banner" class="banner">
+    <nav>
+      <a href="/">🏠 Home</a>
+      <a href="/add">➕ Add</a>
+      <a href="/delete">❌ Delete</a>
+      <a href="/display">📋 Display</a>
+      <a href="/sort">📊 Sort</a>
+      <a href="/search_page">🔍 Search</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>❌ Delete Candidate</h2>
+    <form id="deleteForm">
+      <input type="number" name="candidate_id" placeholder="Candidate ID" required>
+      <button type="submit">Delete</button>
+    </form>
+  </main>
+
+  <script>
+    document.getElementById('deleteForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const id = e.target.candidate_id.value.trim();
+      if (!id) return alert("Please enter a valid Candidate ID.");
+
+      const res = await fetch(`/api/candidates/${id}`, { method: 'DELETE' });
+      const result = await res.json();
+
+      if (res.status === 404) {
+        alert(`⚠️ Error: ${result.error}`);
+      } else if (res.ok) {
+        alert(`✅ ${result.message}`);
+        e.target.reset();
+      } else {
+        alert(`⚠️ Something went wrong: ${result.error}`);
+      }
+    };
+  </script>
+</body>
+</html>

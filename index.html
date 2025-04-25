@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resume Shortlisting System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+  <header>
+    <img src="{{ url_for('static', filename='banner.jpg') }}" alt="Banner" class="banner">
+    <nav>
+      <a href="/">🏠 Home</a>
+      <a href="/add">➕ Add</a>
+      <a href="/delete">❌ Delete</a>
+      <a href="/display">📋 Display</a>
+      <a href="/sort">📊 Sort</a>
+      <a href="/search_page">🔍 Search</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Welcome to the Resume Shortlisting System</h1>
+    <p>Select an action from the menu above to get started.</p>
+  </main>
+</body>
+</html>
